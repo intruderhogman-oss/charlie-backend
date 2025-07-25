@@ -7,10 +7,10 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// ✅ Register the chat route here
+// ✅ Route registration
 app.use('/api/chat', chatRoute);
 
-// Simple health check route
+// ✅ Health check route
 app.get('/', (req, res) => {
   res.send("Charlene is online.");
 });
