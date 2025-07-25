@@ -1,24 +1,38 @@
-const express = require("express");
-const cors = require("cors");
-const dotenv = require("dotenv");
+const express = require('express');
+const bodyParser = require('body-parser');
+const dotenv = require('dotenv');
+const detectIntent = require('./utils/detectIntent');
+const sendToWebhook = require('./utils/sendToWebhook');
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5050;
+const port = process.env.PORT || 5050;
 
-app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-// Log to verify webhook and API key
-console.log("🔑 OPENAI key loaded:", process.env.OPENAI_API_KEY ? "[YES]" : "[NO]");
-console.log("🌐 Webhook:", process.env.WEBHOOK_URL || "[Not set]");
+app.post('/api/chat', async (req, res) => {
+  const { message } = req.body;
 
-// Route registration
-const chatRoutes = require("./routes/chat");
-app.use("/api", chatRoutes);
+  if (!message) {
+    return res.status(400).json({ error: 'Message is required.' });
+  }
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Charlene is online at http://localhost:${PORT}`);
+  try {
+    const reply = await detectIntent(message);
+
+    await sendToWebhook({
+      originalMessage: message,
+      chatbotReply: reply,
+    });
+
+    res.json({ reply });
+  } catch (error) {
+    console.error('Error handling /api/chat:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Charlene is online at port ${port}`);
 });
