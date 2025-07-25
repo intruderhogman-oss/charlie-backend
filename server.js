@@ -7,23 +7,18 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-// ✅ Route registration
+// Register the /api/chat route
 app.use('/api/chat', chatRoute);
 
-// ✅ Health check route
+// Health check
 app.get('/', (req, res) => {
   res.send("Charlene is online.");
 });
 
-// ✅ Log all registered routes
-console.log("✅ ROUTES:");
-console.log(
-  app._router.stack
-    .map((r) => (r.route && r.route.path) || (r.name === 'router' && r.regexp && r.regexp.source))
-    .filter(Boolean)
-);
-
+// ✅ Final: start server and log routes
 const PORT = process.env.PORT || 5050;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log('✅ Charlene backend is ready!');
 });
+
